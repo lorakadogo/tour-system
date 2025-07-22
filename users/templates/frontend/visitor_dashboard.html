@@ -1,0 +1,184 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BOOKING SYSTEMt</title>
+    <link rel="stylesheet" href="style.css">
+      <link rel="stylesheet" href="{% static 'frontend/styles.css' %}">
+</head>
+<body>
+ <nav class="main-nav">
+        <div class="logo">Kenya Tours</div>
+        <ul class="nav-links">
+            <li class="nav-item active" data-page="home">Home</li>
+            <li class="nav-item" data-page="aboutuspage">About Us</li>
+            <li class="nav-item" data-page="contactuspage">Contact Us</li>
+            <li class="nav-item" data-page="tourspage">Tours</li>
+        </ul>
+    </nav>
+
+    <section id="home" class="page active">
+        <div class="container">
+            <div class="header">
+                <h1 class="welcome-title">Welcome to Kenya</h1>
+                <p class="subtitle">Discover Our Amazing Tours</p>
+                <button class="explore-btn" onclick="showtours()">Explore Tours</button>
+            </div>
+            </div>
+    </section>
+
+    <section id="aboutuspage" class="page">
+        <div class="container"> <h2>About Us</h2>
+            <p class="description">
+                We are dedicated to providing unforgettable experiences in Kenya. Our
+                tours are designed to showcase the beauty, culture, and wildlife of this
+                incredible country.
+            </p>
+        </div>
+    </section>
+
+    <section id="contactuspage" class="page">
+        <div class="container"> <h2>Contact Us</h2>
+            <p class="description">
+                For inquiries, bookings, or more information about our tours, please
+                contact us at:
+            </p>
+            <p class="contact-info">
+                Email: <a href="mailto:info@kenyavoyages.com">info@kenyavoyages.com</a>
+            </p>
+            <p class="contact-info">
+                Phone: <a href="tel:+254712345678">+254 712 345 678</a>
+            </p>
+            <p class="contact-info">
+                Address: 123 Safari Drive, Nairobi, Kenya
+            </p>
+
+            <div class="contact-form-container">
+                <h3>Send us a message</h3>
+                <form id="contactForm">
+                    <div class="form-group">
+                        <label for="name">Your Name:</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Your Email:</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="subject">Subject:</label>
+                        <input type="text" id="subject" name="subject">
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message:</label>
+                        <textarea id="message" name="message" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">Send Message</button>
+                </form>
+            </div>
+            <div class="social-media">
+                <h3>Connect with us:</h3>
+                <ul>
+                    <li><a href="https://www.facebook.com/yourpage" target="_blank" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a></li>
+                    <li><a href="https://www.twitter.com/yourhandle" target="_blank" aria-label="Twitter"><i class="fab fa-twitter"></i></a></li>
+                    <li><a href="https://www.instagram.com/youraccount" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a></li>
+                    <li><a href="https://www.linkedin.com/company/yourcompany" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a></li>
+                </ul>
+            </div>
+        </div>
+    </section>
+<section id="tourspage" class="page">
+  <div class="container">
+    <p class="description">
+      Experience the beauty and diversity of Kenya with our curated tours. From
+      breathtaking safaris to cultural experiences, we have something for every
+      traveler.
+    </p>
+
+    <div class="search-section">
+      <h2 style="margin-bottom: 20px; color: #333;">Find Your Perfect Tour</h2>
+      <div class="search-form">
+        <input
+          type="text"
+          class="search-input"
+          id="searchInput"
+          placeholder="Search tours by name or location…"
+        />
+        <button id="searchButton" class="search-btn">Search</button>
+      </div>
+    </div>
+
+    <div class="filter-section">
+      <!-- Categories Filter -->
+      <div class="filter-group">
+        <div class="filter-header" onclick="toggleFilter('categories')">
+          <span class="filter-title">Categories</span>
+          <span class="toggle-icon" id="categoriesIcon">▼</span>
+        </div>
+        <div class="filter-content" id="categoriesContent">
+          <button class="category-item" data-category="all" onclick="filterByCategory('all', event)">All Categories</button>
+          <button class="category-item" data-category="beach & coastal" onclick="filterByCategory('beach & coastal', event)">Beach & Coastal</button>
+          <button class="category-item" data-category="mountain hiking" onclick="filterByCategory('mountain hiking', event)">Mountain Hiking</button>
+          <button class="category-item" data-category="cultural tours" onclick="filterByCategory('cultural tours', event)">Cultural Tours</button>
+          <button class="category-item" data-category="wildlife experience" onclick="filterByCategory('wildlife experience', event)">Wildlife Experience</button>
+        </div>
+      </div>
+
+      <!-- Price Filter -->
+      <div class="filter-group">
+        <div class="filter-header" onclick="toggleFilter('price')">
+          <span class="filter-title">Price Range</span>
+          <span class="toggle-icon" id="priceIcon">▼</span>
+        </div>
+        <div class="filter-content" id="priceContent">
+          <button class="price-item" data-price="all" onclick="filterByPrice('all', event)">All Prices</button>
+          <button class="price-item" data-price="0-100" onclick="filterByPrice('0-100', event)">$0 – $100</button>
+          <button class="price-item" data-price="100-300" onclick="filterByPrice('100-300', event)">$100 – $300</button>
+          <button class="price-item" data-price="300-500" onclick="filterByPrice('300-500', event)">$300 – $500</button>
+          <button class="price-item" data-price="500-1000" onclick="filterByPrice('500-1000', event)">$500 – $1000</button>
+          <button class="price-item" data-price="1000+" onclick="filterByPrice('1000+', event)">$1000+</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tours Grid (cards injected by JS) -->
+    <div class="tours-grid" id="toursGrid"></div>
+  </div>
+</section>
+
+<!-- Booking Modal -->
+<div id="bookingModal" class="modal hidden">
+  <div class="modal-content">
+    <span id="closeModal" class="close">&times;</span>
+    <h2>Book Your Tour</h2>
+    <p id="modalTourName"></p>
+
+    <form id="bookingForm">
+      <input type="hidden" id="selectedTourId" name="tourId" />
+
+      <div class="form-group">
+        <label for="userName">Your Name</label>
+        <input type="text" id="userName" name="userName" required />
+      </div>
+
+      <div class="form-group">
+        <label for="userEmail">Your Email</label>
+        <input type="email" id="userEmail" name="userEmail" required />
+      </div>
+
+      <div class="form-group">
+        <label for="startDate">Start Date</label>
+        <input type="date" id="startDate" name="startDate" required />
+      </div>
+
+      <button type="submit" class="confirm-btn">Confirm Booking</button>
+    </form>
+  </div>
+</div>
+   </section>
+     <script src="{% static 'frontend/scripts.js' %}"></script>
+</body>
+<script src="ap.js"></script>
+</html>

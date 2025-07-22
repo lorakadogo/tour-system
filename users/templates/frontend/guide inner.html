@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GUIDE SYSTEM</title>
+    <link rel="stylesheet" href="guide.css">
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>Navigation</h2>
+            <a href="#" data-section="home" class="active">🏠 Home</a>
+            <a href="#" data-section="schedule">📅 Schedule</a>
+            <a href="#" data-section="status">🔄 Status</a>
+            <a href="#" data-section="instructions">📋 Instructions</a>
+            <a href="#" data-section="report">📝 Report</a>
+        </div>
+
+        <div class="main-content-wrapper">
+            <div id="home" class="content-section active">
+                <header class="homepage-header">
+                    <h1>🌍 Tour Guide Platform</h1>
+                    <p>Your guide to schedule, updates, instructions, and reporting</p>
+                </header>
+                <p>Welcome to the Tour Guide Platform! Use the sidebar navigation to access different sections like your schedule, status updates, instructions, and reporting tools.</p>
+                <p>This is your central hub for all tour-related activities. Explore the features by clicking on the links in the left sidebar.</p>
+            </div>
+
+            <section id="schedule" class="content-section">
+                <h2>📅 Your Schedule</h2>
+                <p>Details about your upcoming tours will be displayed here.</p>
+                <table id="tourTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Tour Name</th>
+                            <th>Type &amp; Duration</th>
+                            <th>Conflict</th>
+                            <th>Group Size</th>
+                            <th>Age Groups</th>
+                            <th>Requests</th>
+                            <th>Languages</th>
+                            <th>Add to Calendar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </section>
+
+            <section id="status" class="content-section">
+                <h2>Tour Status</h2>
+                <div class="flex">
+                    <section class="left">
+                        <h3>Tour Progress</h3>
+                        <label>
+                            <span class="status-indicator in-progress" id="mainIcon">🟡</span>
+                            <select id="tourStatus">
+                                <option value="not-started">Not Started</option>
+                                <option value="in-progress" selected>In Progress</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </label>
+
+                        <button id="stop1">✅ Arrived at Stop 1</button>
+                        <button id="stop2">🟡 Departed Stop 1</button>
+                        <button id="stop3">🟡 Arrived at Stop 2</button>
+                    </section>
+
+                    <section class="right">
+                        <h3>Quick Reporting</h3>
+                        <label>📝 Add Note
+                            <textarea id="noteField" rows="3" placeholder="Type your final note…"></textarea>
+                        </label>
+                        <label>📤 Upload Photo (optional)
+                            <input type="file" id="photoUpload" accept="image/*" />
+                        </label>
+                        <label>❗ Delay Reason
+                            <select id="delayReason">
+                                <option value="">Select reason</option>
+                                <option value="traffic">Traffic</option>
+                                <option value="weather">Weather</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </label>
+                        <button id="submitFeedback">Submit Feedback</button>
+                        <div class="autosave" id="autosaveMsg" style="display:none;">Saved ✓</div>
+                    </section>
+                </div>
+            </section>
+
+            <section id="instructions" class="content-section">
+                <h2>📋 Instructions & Guidelines</h2>
+                <p>Find important instructions and guidelines for your tours here.</p>
+
+                <button id="checkItineraryBtn" class="button">
+                    🗺️ Check Itinerary & Instructions
+                </button>
+            </section>
+
+            <section id="report" class="content-section">
+                <h2>📝 Reporting Tools</h2>
+                <p>Access tools to submit reports and feedback.</p>
+
+                <button class="button" onclick="openModal('tourReportModal')">
+                    ✅ Submit Detailed Tour Report
+                </button>
+                <button class="button" onclick="openModal('feedbackModal')">
+                    ✅ Upload Feedback Forms & Surveys
+                </button>
+                <button class="button" onclick="openModal('incidentReportModal')">
+                    ✅ Share Incident Report
+                </button>
+                <button class="button" onclick="openModal('mediaGalleryModal')">
+                    ✅ Generate Media Gallery
+                </button>
+            </section>
+        </div> </div> <div id="itineraryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                Check Itinerary & Instructions
+            </div>
+
+            <div id="viewMode" class="modal-body">
+                </div>
+            <div id="viewFooter" class="modal-footer">
+                <button onclick="openEditMode()">Edit</button>
+                <button onclick="closeModal('itineraryModal')">Close</button>
+            </div>
+
+            <div id="editMode" class="modal-body hidden">
+                <form id="editForm" onsubmit="saveEdits(); return false;">
+                    <h3>🗺️ Itinerary Details</h3>
+                    <div id="itineraryItems"></div>
+
+                    <h4>Backup Plans</h4>
+                    <div id="backupItems"></div>
+
+                    <h3>📋 Logistical Instructions</h3>
+                    <label>
+                        Pickup:
+                        <input type="text" name="pickup" required />
+                    </label>
+                    <label>
+                        Transportation:
+                        <input type="text" name="transportation" required />
+                    </label>
+                    <label>
+                        Equipment:
+                        <input type="text" name="equipment" required />
+                    </label>
+
+                    <h4>Emergency Procedures</h4>
+                    <div id="emergencyItems"></div>
+
+                    <div class="modal-footer">
+                        <button type="submit">Save</button>
+                        <button type="button" onclick="cancelEdit()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="tourReportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Submit Detailed Tour Report</div>
+            <div class="modal-body">
+                <form id="tourReportForm" onsubmit="submitTourReport(); return false;">
+                    <textarea
+                        name="report"
+                        rows="8"
+                        placeholder="Number of tourists, start/end time, locations, highlights or issues…"
+                        required
+                    ></textarea>
+                    <div class="modal-footer">
+                        <button type="submit">Submit</button>
+                        <button type="button" onclick="closeModal('tourReportModal')">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="feedbackModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Upload Feedback Forms & Surveys</div>
+            <div class="modal-body">
+                <form id="feedbackForm" onsubmit="uploadFeedback(); return false;">
+                    <input
+                        type="file"
+                        name="feedback"
+                        accept=".pdf,.doc,.docx,image/*"
+                        multiple
+                        required
+                    >
+                    <div class="modal-footer">
+                        <button type="submit">Upload</button>
+                        <button type="button" onclick="closeModal('feedbackModal')">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="incidentReportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Share Incident Report</div>
+            <div class="modal-body">
+                <form id="incidentReportForm" onsubmit="submitIncidentReport(); return false;">
+                    <input type="datetime-local" name="incidentDateTime" required>
+                    <textarea
+                        name="description"
+                        rows="4"
+                        placeholder="Describe the incident…"
+                        required
+                    ></textarea>
+                    <input
+                        type="text"
+                        name="peopleInvolved"
+                        placeholder="People involved"
+                    >
+                    <input type="file" name="incidentPhoto" accept="image/*">
+                    <div class="modal-footer">
+                        <button type="submit">Submit</button>
+                        <button type="button" onclick="closeModal('incidentReportModal')">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="mediaGalleryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Generate Media Gallery</div>
+            <div class="modal-body">
+                <form id="mediaGalleryForm" onsubmit="generateMediaGallery(); return false;">
+                    <input
+                        type="text"
+                        name="galleryName"
+                        placeholder="Gallery name"
+                        required
+                    > 
+                    <input
+                        type="file"
+                        name="mediaFiles"
+                        accept="image/*,video/*"
+                        multiple
+                        required
+                    >
+                    <div class="modal-footer">
+                        <button type="submit">Generate</button>
+                        <button type="button" onclick="closeModal('mediaGalleryModal')">Close</button>
+                    </div>
+                </form>
+                <div id="galleryPreview"></div>
+            </div>
+        </div>
+    </div>
+
+</body>
+<script src="guide app.js"></script>
+</html>

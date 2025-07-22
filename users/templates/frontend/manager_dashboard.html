@@ -1,0 +1,380 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BOOKING SYSTEM</title>
+    <link rel="stylesheet" href="manager.css">
+      <link rel="stylesheet" href="{% static 'frontend/styles.css' %}">
+</head>
+<body>
+      <div class="container">
+        <div class="header">
+            <h1>🎯 Tour Manager System</h1>
+            <p>Comprehensive management dashboard for tour operations</p>
+        </div>
+
+        <div class="nav-tabs">
+            <div class="nav-tab active" onclick="showTab('dashboard')">Dashboard</div>
+            <div class="nav-tab" onclick="showTab('bookings')">Bookings</div>
+            <div class="nav-tab" onclick="showTab('tours')">Tours</div>
+            <div class="nav-tab" onclick="showTab('payments')">Payments</div>
+            <div class="nav-tab" onclick="showTab('assignments')">Assignments</div>
+            <div class="nav-tab" onclick="showTab('reports')">Reports</div>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3 id="totalBookings">247</h3>
+                    <p>Total Bookings</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="pendingApprovals">12</h3>
+                    <p>Pending Approvals</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="totalRevenue">$45,230</h3>
+                    <p>Total Revenue</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="activeGuides">18</h3>
+                    <p>Active Guides</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Recent Activities</h2>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Activity</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentActivities">
+                        <tr>
+                            <td>2 hours ago</td>
+                            <td>New booking request - Diani Beach Retreat</td>
+                            <td><span class="status-badge status-pending">Pending</span></td>
+                            <td><button class="btn btn-primary" onclick="approveBooking(1)">Review</button></td>
+                        </tr>
+                        <tr>
+                            <td>4 hours ago</td>
+                            <td>Payment dispute - Mount Kenya Hiking</td>
+                            <td><span class="status-badge status-pending">Pending</span></td>
+                            <td><button class="btn btn-warning" onclick="resolvePayment(1)">Resolve</button></td>
+                        </tr>
+                        <tr>
+                            <td>1 day ago</td>
+                            <td>Guide assignment completed</td>
+                            <td><span class="status-badge status-approved">Completed</span></td>
+                            <td>-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Bookings Tab -->
+        <div id="bookings" class="tab-content">
+            <div class="section">
+                <h2>Booking Management</h2>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Customer</th>
+                            <th>Tour</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bookingsTable">
+                        <tr>
+                            <td>BK001</td>
+                            <td>John Smith</td>
+                            <td>Safari Adventure</td>
+                            <td>2025-08-15</td>
+                            <td><span class="status-badge status-pending">Pending</span></td>
+                            <td>
+                                <button class="btn btn-success" onclick="approveBooking('BK001')">Approve</button>
+                                <button class="btn btn-danger" onclick="rejectBooking('BK001')">Reject</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>BK002</td>
+                            <td>Sarah Johnson</td>
+                            <td>Mountain Trek</td>
+                            <td>2025-08-20</td>
+                            <td><span class="status-badge status-approved">Approved</span></td>
+                            <td>
+                                <button class="btn btn-primary" onclick="editBooking('BK002')">Edit</button>
+                                <button class="btn btn-danger" onclick="cancelBooking('BK002')">Cancel</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tours Tab -->
+        <div id="tours" class="tab-content">
+            <div class="section">
+                <h2>Tour Management</h2>
+                <button class="btn btn-primary" onclick="showAddTourModal()">Add New Tour</button>
+                
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Tour ID</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Duration</th>
+                            <th>Availability</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="toursTable">
+                        <tr>
+                            <td>TR001</td>
+                            <td>Safari Adventure</td>
+                            <td>$299</td>
+                            <td>3 days</td>
+                            <td>Available</td>
+                            <td>
+                                <button class="btn btn-primary" onclick="editTour('TR001')">Edit</button>
+                                <button class="btn btn-danger" onclick="deleteTour('TR001')">Delete</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>TR002</td>
+                            <td>Mountain Trek</td>
+                            <td>$199</td>
+                            <td>2 days</td>
+                            <td>Available</td>
+                            <td>
+                                <button class="btn btn-primary" onclick="editTour('TR002')">Edit</button>
+                                <button class="btn btn-danger" onclick="deleteTour('TR002')">Delete</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Payments Tab -->
+        <div id="payments" class="tab-content">
+            <div class="section">
+                <h2>Payment Management</h2>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Payment ID</th>
+                            <th>Booking</th>
+                            <th>Customer</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="paymentsTable">
+                        <tr>
+                            <td>PAY001</td>
+                            <td>BK001</td>
+                            <td>John Smith</td>
+                            <td>$299</td>
+                            <td><span class="status-badge status-pending">Pending</span></td>
+                            <td>
+                                <button class="btn btn-success" onclick="processPayment('PAY001')">Process</button>
+                                <button class="btn btn-danger" onclick="refundPayment('PAY001')">Refund</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>PAY002</td>
+                            <td>BK002</td>
+                            <td>Sarah Johnson</td>
+                            <td>$199</td>
+                            <td><span class="status-badge status-paid">Paid</span></td>
+                            <td>
+                                <button class="btn btn-warning" onclick="issueRefund('PAY002')">Issue Refund</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Assignments Tab -->
+        <div id="assignments" class="tab-content">
+            <div class="section">
+                <h2>Resource Assignments</h2>
+                <button class="btn btn-primary" onclick="showAssignmentModal()">New Assignment</button>
+                
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Assignment ID</th>
+                            <th>Tour</th>
+                            <th>Guide</th>
+                            <th>Transport</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="assignmentsTable">
+                        <tr>
+                            <td>AS001</td>
+                            <td>Safari Adventure</td>
+                            <td>Mike Johnson</td>
+                            <td>Safari Vehicle #1</td>
+                            <td>2025-08-15</td>
+                            <td>
+                                <button class="btn btn-primary" onclick="editAssignment('AS001')">Edit</button>
+                                <button class="btn btn-danger" onclick="deleteAssignment('AS001')">Delete</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Reports Tab -->
+        <div id="reports" class="tab-content">
+            <div class="section">
+                <h2>Reports & Analytics</h2>
+                
+                <div class="report-card">
+                    <h3>Monthly Revenue Report</h3>
+                    <div class="chart-container">
+                        <canvas id="revenueChart" width="400" height="200"></canvas>
+                    </div>
+                    <button class="btn btn-primary" onclick="generateReport('revenue')">Generate Report</button>
+                </div>
+
+                <div class="report-card">
+                    <h3>Booking Statistics</h3>
+                    <div class="chart-container">
+                        <canvas id="bookingChart" width="400" height="200"></canvas>
+                    </div>
+                    <button class="btn btn-primary" onclick="generateReport('bookings')">Generate Report</button>
+                </div>
+
+                <div class="form-group">
+                    <label>Custom Report Range:</label>
+                    <div class="form-grid">
+                        <input type="date" id="reportStartDate" placeholder="Start Date">
+                        <input type="date" id="reportEndDate" placeholder="End Date">
+                    </div>
+                    <button class="btn btn-primary" onclick="generateCustomReport()">Generate Custom Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="tourModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeTourModal()">&times;</span>
+            <h2>Add/Edit Tour</h2>
+            <form id="tourForm">
+                <div class="form-group">
+                    <label>Tour Name:</label>
+                    <input type="text" id="tourName" required>
+                </div>
+                <div class="form-group">
+                    <label>Category:</label>
+                    <select id="tourCategory" required>
+                        <option value="">Select Category</option>
+                        <option value="Beach & Coastal">Beach & Coastal</option>
+                        <option value="Mountain Hiking">Mountain Hiking</option>
+                        <option value="Cultural Tours">Cultural Tours</option>
+                        <option value="Wildlife Experience">Wildlife Experience</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Description:</label>
+                    <textarea id="tourDescription" rows="3"></textarea>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Price:</label>
+                        <input type="number" id="tourPrice" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Duration:</label>
+                        <input type="text" id="tourDuration" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Availability:</label>
+                    <select id="tourAvailability">
+                        <option value="available">Available</option>
+                        <option value="unavailable">Unavailable</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Tour</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="assignmentModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAssignmentModal()">&times;</span>
+            <h2>New Assignment</h2>
+            <form id="assignmentForm">
+                <div class="form-group">
+                    <label>Tour:</label>
+                    <select id="assignmentTour" required>
+                        <option value="">Select Tour</option>
+                        <option value="Diani Beach  Paradise">Diani Beach Paradise</option>
+                        <option value="Mount Kenya  Climbing Expedition ">Mount Kenya Climbing Expedition</option>
+                        <option value="Maasai Village Cultural Experience">Maasai Village Cultural Experience</option>
+                        <option value="Tsavo East & West Safari">Tsavo East & West Safari</option>
+                        <option value="Lamu Island Cultural Retreat">Lamu Island Cultural Retreat</option>
+                        <option value="Aberdare National Park Wildlife Safari">Aberdare National Park Wildlife Safari</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Guide:</label>
+                    <select id="assignmentGuide" required>
+                        <option value="">Select Guide</option>
+                        <option value="Mike Johnson">Mike Johnson</option>
+                        <option value="Sarah Wilson">Sarah Wilson</option>
+                        <option value="David Brown">David Brown</option>
+                        <option value="Lisa Anderson">Lisa Anderson</option>
+                        <option value="James Carter">James Carter</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Transport:</label>
+                    <select id="assignmentTransport" required>
+                        <option value="">Select Transport</option>
+                        <option value="Beach Bus #1">Beach Bus #1</option>
+                        <option value="Safari Vehicle #1">Safari Vehicle #1</option>
+                        <option value="Safari Vehicle #3">Safari Vehicle #3</option>
+                        <option value="Mountain 4WD #1">Mountain 4WD #1</option>
+                        <option value="4WD Vehicle #2">4WD Vehicle #2</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Date:</label>
+                    <input type="date" id="assignmentDate" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Create Assignment</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="alertContainer"></div>  
+      <script src="{% static 'frontend/scripts.js' %}"></script>  
+</body>
+<script src="manager.js"></script>
+</html>
