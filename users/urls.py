@@ -15,10 +15,10 @@ urlpatterns = [
     path('visitor_dashboard/', views.visitor_dashboard, name='visitor_dashboard'),
 
     path('submit-tour-report/', views.submit_tour_report, name='submit_tour_report'),
-    path('upload-feedback/', views.upload_feedback, name='upload_feedback'),  # ✅ Add this
-    path('submit-incident/', views.submit_incident, name='submit_incident'),  # ✅ Add this
-    path('generate-gallery/', views.generate_gallery, name='generate_gallery'),  # ✅ Add this
-    path('save-itinerary/', views.save_itinerary, name='save_itinerary'),  # ✅ Add this
+    path('upload-feedback/', views.upload_feedback, name='upload_feedback'),  
+    path('submit-incident/', views.submit_incident, name='submit_incident'),  
+    path('generate-gallery/', views.generate_gallery, name='generate_gallery'),  
+    path('save-itinerary/', views.save_itinerary, name='save_itinerary'),
 
     path('profile/', views.profile, name='profile'),
 ]
