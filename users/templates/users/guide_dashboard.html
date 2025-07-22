@@ -1,0 +1,338 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Tour Guide Dashboard</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Custom styles -->
+  <link rel="stylesheet" href="{% static 'frontend/styles.css' %}">
+  <style>
+    /* Utility classes that are easier to tweak without PostCSS */
+    .btn {
+      background-color: #2563eb; /* tailwind blue-600 */
+      color: #fff;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 2px rgba(0,0,0,.05);
+      transition: background-color .15s ease;
+    }
+    .btn:hover { background-color: #1d4ed8; }
+    .btn-outline {
+      border: 1px solid #d1d5db; /* gray-300 */
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+    }
+    .section.hidden { display: none; }
+    .modal { position: fixed; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; }
+    .modal.show { display: flex; }
+    .modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.4); }
+    .modal-box { position: relative; background: #fff; border-radius: 0.75rem; width: 100%; max-width: 36rem; padding: 1.5rem; box-shadow: 0 10px 15px rgba(0,0,0,.1); }
+    .modal-header { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+  </style>
+</head>
+<body class="h-full bg-gray-100 text-gray-800">
+  <div class="flex h-full">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white shadow-lg">
+      <h1 class="text-xl font-semibold px-6 py-4">Navigation</h1>
+      <nav class="flex flex-col gap-2 px-4">
+        <button data-section="home" class="nav-link flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-200 font-semibold bg-gray-200">🏠 <span>Home</span></button>
+        <button data-section="schedule" class="nav-link flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-200">📅 <span>Schedule</span></button>
+        <button data-section="status" class="nav-link flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-200">🔄 <span>Status</span></button>
+        <button data-section="instructions" class="nav-link flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-200">📋 <span>Instructions</span></button>
+        <button data-section="report" class="nav-link flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-200">📝 <span>Report</span></button>
+      </nav>
+    </aside>
+
+    <!-- Main content -->
+    <main class="flex-1 overflow-y-auto p-6">
+
+      <!-- Home -->
+      <section id="home" class="section">
+        <header class="mb-6">
+          <h2 class="text-3xl font-bold mb-2">🌍 Tour Guide Platform</h2>
+          <p class="text-gray-600">Your guide to schedule, updates, instructions, and reporting.</p>
+        </header>
+        <p class="mb-2">Welcome to the Tour Guide Platform! Use the sidebar navigation to access different sections.</p>
+        <p>Explore the features by clicking on the links in the left sidebar.</p>
+      </section>
+
+      <!-- Schedule -->
+      <section id="schedule" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">📅 Your Schedule</h2>
+        <div class="overflow-x-auto">
+          <table id="tourTable" class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-3 py-2 text-left text-sm font-medium text-gray-700">Date</th>
+                <th class="px-3 py-2 text-left text-sm font-medium text-gray-700">Time</th>
+                <th class="px-3 py-2 text-left text-sm font-medium text-gray-700">Tour</th>
+                <th class="px-3 py-2 text-left text-sm font-medium text-gray-700">Type & Duration</th>
+                <th class="px-3 py-2 text-left text-sm font-medium text-gray-700">Conflict</th>
+                <th class="px-3 py-2 text-left text-sm font-medium text-gray-700">Group Size</th>
+                <th class="px-3 py-2 text-left text-sm font-medium text-gray-700">Age Groups</th>
+                <th class="px-3 py-2 text-left text-sm font-medium text-gray-700">Requests</th>
+                <th class="px-3 py-2 text-left text-sm font-medium text-gray-700">Languages</th>
+                <th class="px-3 py-2 text-left text-sm font-medium text-gray-700">Add to Calendar</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100"><!-- Dynamic rows injected by JS --></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Status -->
+      <section id="status" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">🔄 Tour Status</h2>
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <h3 class="font-medium mb-2">Tour Progress</h3>
+            <label class="flex items-center gap-2 mb-4">
+              <span id="mainIcon" class="text-xl">🟡</span>
+              <select id="tourStatus" class="rounded border-gray-300">
+                <option value="not-started">Not Started</option>
+                <option value="in-progress" selected>In Progress</option>
+                <option value="completed">Completed</option>
+              </select>
+            </label>
+
+            <div class="flex flex-col gap-2">
+              <button id="stop1" class="btn">✅ Arrived at Stop 1</button>
+              <button id="stop2" class="btn">🟡 Departed Stop 1</button>
+              <button id="stop3" class="btn">🟡 Arrived at Stop 2</button>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="font-medium mb-2">Quick Reporting</h3>
+            <label class="block mb-3">
+              <span class="block mb-1">📝 Add Note</span>
+              <textarea id="noteField" rows="3" class="w-full rounded border-gray-300 p-2" placeholder="Type your final note…"></textarea>
+            </label>
+            <label class="block mb-3">
+              <span class="block mb-1">📤 Upload Photo (optional)</span>
+              <input type="file" id="photoUpload" accept="image/*">
+            </label>
+            <label class="block mb-3">
+              <span class="block mb-1">❗ Delay Reason</span>
+              <select id="delayReason" class="rounded border-gray-300">
+                <option value="">Select reason</option>
+                <option value="traffic">Traffic</option>
+                <option value="weather">Weather</option>
+                <option value="other">Other</option>
+              </select>
+            </label>
+            <button id="submitFeedback" class="btn w-full">Submit Feedback</button>
+            <div id="autosaveMsg" class="text-green-600 text-sm mt-2 hidden">Saved ✓</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Instructions -->
+      <section id="instructions" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">📋 Instructions & Guidelines</h2>
+        <p class="mb-4">Find important instructions and guidelines for your tours here.</p>
+        <button id="checkItineraryBtn" class="btn">🗺️ Check Itinerary & Instructions</button>
+      </section>
+
+      <!-- Report -->
+      <section id="report" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">📝 Reporting Tools</h2>
+        <p class="mb-4">Access tools to submit reports and feedback.</p>
+        <div class="flex flex-col gap-2">
+          <button class="btn" data-modal="tourReportModal">✅ Submit Detailed Tour Report</button>
+          <button class="btn" data-modal="feedbackModal">✅ Upload Feedback Forms & Surveys</button>
+          <button class="btn" data-modal="incidentReportModal">✅ Share Incident Report</button>
+          <button class="btn" data-modal="mediaGalleryModal">✅ Generate Media Gallery</button>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Modals -->
+  <!-- Tour Report Modal -->
+  <div id="tourReportModal" class="modal" aria-hidden="true">
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-box">
+      <header class="modal-header">Submit Detailed Tour Report</header>
+      <form id="tourReportForm" class="space-y-4" method="post" action="{% url 'users:submit_tour_report' %}">
+
+
+        {% csrf_token %}
+        <textarea name="report" rows="8" class="w-full rounded border-gray-300 p-2" placeholder="Number of tourists, start/end time…" required></textarea>
+        <footer class="flex justify-end gap-2">
+          <button type="submit" class="btn">Submit</button>
+          <button type="button" class="btn-outline" data-close>Close</button>
+        </footer>
+      </form>
+    </div>
+  </div>
+
+  <!-- Feedback Modal -->
+  <div id="feedbackModal" class="modal" aria-hidden="true">
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-box">
+      <header class="modal-header">Upload Feedback Forms & Surveys</header>
+      <form id="feedbackForm" class="space-y-4" method="post" action="{% url 'upload_feedback' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="feedback" accept=".pdf,.doc,.docx,image/*" multiple required>
+        <footer class="flex justify-end gap-2">
+          <button type="submit" class="btn">Upload</button>
+          <button type="button" class="btn-outline" data-close>Close</button>
+        </footer>
+      </form>
+    </div>
+  </div>
+
+  <!-- Incident Report Modal -->
+  <div id="incidentReportModal" class="modal" aria-hidden="true">
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-box">
+      <header class="modal-header">Share Incident Report</header>
+      <form id="incidentReportForm" class="space-y-4" method="post" action="{% url 'submit_incident' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="datetime-local" name="incidentDateTime" class="rounded border-gray-300 w-full" required>
+        <textarea name="description" rows="4" class="w-full rounded border-gray-300 p-2" placeholder="Describe the incident…" required></textarea>
+        <input type="text" name="peopleInvolved" class="w-full rounded border-gray-300 p-2" placeholder="People involved">
+        <input type="file" name="incidentPhoto" accept="image/*">
+        <footer class="flex justify-end gap-2">
+          <button type="submit" class="btn">Submit</button>
+          <button type="button" class="btn-outline" data-close>Close</button>
+        </footer>
+      </form>
+    </div>
+  </div>
+
+  <!-- Media Gallery Modal -->
+  <div id="mediaGalleryModal" class="modal" aria-hidden="true">
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-box">
+      <header class="modal-header">Generate Media Gallery</header>
+      <form id="mediaGalleryForm" class="space-y-4" method="post" action="{% url 'generate_gallery' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="text" name="galleryName" class="w-full rounded border-gray-300 p-2" placeholder="Gallery name" required>
+        <input type="file" name="mediaFiles" accept="image/*,video/*" multiple required>
+        <footer class="flex justify-end gap-2">
+          <button type="submit" class="btn">Generate</button>
+          <button type="button" class="btn-outline" data-close>Close</button>
+        </footer>
+      </form>
+      <div id="galleryPreview" class="mt-4 grid grid-cols-2 gap-2"></div>
+    </div>
+  </div>
+
+  <!-- Itinerary Modal -->
+  <div id="itineraryModal" class="modal" aria-hidden="true">
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-box max-w-4xl">
+      <header class="modal-header flex justify-between items-center">
+        <span>Check Itinerary & Instructions</span>
+        <button type="button" class="btn-outline text-sm" id="editToggleBtn">Edit</button>
+      </header>
+
+      <!-- View Mode -->
+      <div id="viewMode" class="space-y-4">
+        <!-- dynamic content injected by JS -->
+      </div>
+
+      <!-- Edit Mode -->
+      <form id="editForm" class="space-y-4 hidden" method="post" action="{% url 'save_itinerary' %}">
+        {% csrf_token %}
+        <h3 class="text-lg font-semibold">🗺️ Itinerary Details</h3>
+        <div id="itineraryItems" class="space-y-2"></div>
+
+        <h4 class="font-medium">Backup Plans</h4>
+        <div id="backupItems" class="space-y-2"></div>
+
+        <h3 class="text-lg font-semibold">📋 Logistical Instructions</h3>
+        <label class="block">
+          <span class="block mb-1">Pickup</span>
+          <input type="text" name="pickup" class="w-full rounded border-gray-300 p-2" required>
+        </label>
+        <label class="block">
+          <span class="block mb-1">Transportation</span>
+          <input type="text" name="transportation" class="w-full rounded border-gray-300 p-2" required>
+        </label>
+        <label class="block">
+          <span class="block mb-1">Equipment</span>
+          <input type="text" name="equipment" class="w-full rounded border-gray-300 p-2" required>
+        </label>
+
+        <h4 class="font-medium">Emergency Procedures</h4>
+        <div id="emergencyItems" class="space-y-2"></div>
+
+        <footer class="flex justify-end gap-2">
+          <button type="submit" class="btn">Save</button>
+          <button type="reset" class="btn-outline" id="cancelEdit">Cancel</button>
+        </footer>
+      </form>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script defer src="{% static 'frontend/scripts.js' %}"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Navigation handling
+      const links = document.querySelectorAll('.nav-link');
+      links.forEach(btn => btn.addEventListener('click', () => {
+        links.forEach(l => l.classList.remove('bg-gray-200', 'font-semibold'));
+        btn.classList.add('bg-gray-200', 'font-semibold');
+        document.querySelectorAll('.section').forEach(sec => sec.classList.add('hidden'));
+        document.getElementById(btn.dataset.section).classList.remove('hidden');
+      }));
+
+      // Modal helpers
+      const openModal = id => document.getElementById(id).classList.add('show');
+      const closeModal = modal => modal.classList.remove('show');
+
+      document.querySelectorAll('[data-modal]').forEach(btn => btn.addEventListener('click', () => openModal(btn.dataset.modal)));
+      document.querySelectorAll('[data-close]').forEach(btn => btn.addEventListener('click', () => closeModal(btn.closest('.modal'))));
+      document.querySelectorAll('.modal').forEach(modal => modal.addEventListener('click', e => e.target === modal && closeModal(modal)));
+
+      // Dedicated itinerary edit toggle
+      const itineraryModal = document.getElementById('itineraryModal');
+      const editToggleBtn = document.getElementById('editToggleBtn');
+      const viewMode = document.getElementById('viewMode');
+      const editForm = document.getElementById('editForm');
+      editToggleBtn.addEventListener('click', () => {
+        const isEditing = editForm.classList.toggle('hidden');
+        viewMode.classList.toggle('hidden', !isEditing);
+        editToggleBtn.textContent = isEditing ? 'Close' : 'Edit';
+      });
+      document.getElementById('cancelEdit').addEventListener('click', () => {
+        editForm.classList.add('hidden');
+        viewMode.classList.remove('hidden');
+        editToggleBtn.textContent = 'Edit';
+      });
+
+      // Basic autosave mock for status notes
+      const noteField = document.getElementById('noteField');
+      const autosaveMsg = document.getElementById('autosaveMsg');
+      noteField.addEventListener('input', () => {
+        autosaveMsg.classList.remove('hidden');
+        clearTimeout(window.autosaveTimeout);
+        window.autosaveTimeout = setTimeout(() => autosaveMsg.classList.add('hidden'), 1500);
+      });
+    });
+  </script>
+</body>
+</html>

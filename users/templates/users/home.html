@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tour System</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        // Configure Tailwind to use 'Inter' font and rounded corners consistently
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        'xl': '0.75rem',
+                        '2xl': '1rem',
+                        '3xl': '1.5rem',
+                    },
+                    colors: {
+                        primary: {
+                            500: '#3B82F6',
+                            600: '#2563EB',
+                            700: '#1D4ED8',
+                        },
+                        secondary: {
+                            500: '#10B981',
+                            600: '#059669',
+                            700: '#047857',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom styles */
+        .modal-overlay {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+        .booking-form-container {
+            display: none;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+        }
+        .booking-form-container.active {
+            display: block;
+            transform: translateY(0);
+        }
+        .booking-message {
+            display: none;
+        }
+        .booking-message.success {
+            display: block;
+            background-color: #D1FAE5;
+            color: #065F46;
+        }
+        .booking-message.error {
+            display: block;
+            background-color: #FEE2E2;
+            color: #B91C1C;
+        }
+        .booking-message.processing {
+            display: block;
+            background-color: #DBEAFE;
+            color: #1E40AF;
+        }
+        .tour-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .filter-content {
+            display: none;
+        }
+        .filter-content.active {
+            display: flex;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased bg-gray-50 text-gray-800">
+
+    <!-- Main Navigation Bar -->
+    <nav class="main-nav bg-gray-800 text-white p-4 flex justify-between items-center w-full shadow-lg rounded-b-xl sticky top-0 z-50">
+        <div class="logo text-2xl font-bold mr-5 flex items-center">
+            <i class="fas fa-map-marked-alt mr-2"></i>
+            <span>TourSystem</span>
+        </div>
+        <ul class="nav-links list-none m-0 p-0 flex gap-5 justify-end items-center">
+            <li class="nav-item cursor-pointer py-1 transition-colors duration-300 active" data-page="home">Home</li>
+            <li class="nav-item cursor-pointer py-1 transition-colors duration-300" data-page="aboutuspage">About Us</li>
+            <li class="nav-item cursor-pointer py-1 transition-colors duration-300" data-page="contactuspage">Contact Us</li>
+            <li class="nav-item cursor-pointer py-1 transition-colors duration-300" data-page="tourspage">Tours</li>
+
+            {% if user.is_authenticated %}
+                <li class="nav-item py-1 transition-colors duration-300 flex items-center">
+                    <i class="fas fa-user-circle mr-2"></i>
+                    <span>Hello, {{ user.username }}!</span>
+                </li>
+                {% if user.is_guide %}
+                    <li class="nav-item cursor-pointer py-1 transition-colors duration-300">
+                        <a href="{% url 'users:guide_dashboard' %}" class="text-white hover:text-gray-300 no-underline flex items-center">
+                            <i class="fas fa-chalkboard-teacher mr-2"></i>
+                            <span>Guide Dashboard</span>
+                        </a>
+                    </li>
+                {% elif user.is_visitor %}
+                    <li class="nav-item cursor-pointer py-1 transition-colors duration-300">
+                        <a href="{% url 'users:visitor_dashboard' %}" class="text-white hover:text-gray-300 no-underline flex items-center">
+                            <i class="fas fa-user-tie mr-2"></i>
+                            <span>Visitor Dashboard</span>
+                        </a>
+                    </li>
+                {% endif %}
+                <li class="nav-item cursor-pointer py-1 transition-colors duration-300">
+                    <a href="{% url 'users:logout' %}" class="text-white hover:text-gray-300 no-underline flex items-center">
+                        <i class="fas fa-sign-out-alt mr-2"></i>
+                        <span>Logout</span>
+                    </a>
+                </li>
+            {% else %}
+                <li class="nav-item cursor-pointer py-1 transition-colors duration-300">
+                    <a href="{% url 'users:login' %}" class="text-white hover:text-gray-300 no-underline flex items-center">
+                        <i class="fas fa-sign-in-alt mr-2"></i>
+                        <span>Login</span>
+                    </a>
+                </li>
+                <li class="nav-item cursor-pointer py-1 transition-colors duration-300">
+                    <a href="{% url 'users:register' %}" class="text-white hover:text-gray-300 no-underline flex items-center">
+                        <i class="fas fa-user-plus mr-2"></i>
+                        <span>Register</span>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <!-- Page Content Containers -->
+    <div id="home" class="page active p-5 max-w-4xl mx-auto my-8 bg-white rounded-xl shadow-md">
+        <div class="header text-center py-12">
+            <h1 class="welcome-title text-5xl font-extrabold text-gray-900 mb-4">Discover Your Next Adventure</h1>
+            <p class="subtitle text-xl text-gray-600 mb-8">Unforgettable journeys await you around the globe.</p>
+            <button class="explore-btn bg-primary-600 text-white px-8 py-3 rounded-full cursor-pointer text-lg font-semibold transition-all duration-300 hover:bg-primary-700 hover:shadow-lg flex items-center mx-auto">
+                <i class="fas fa-binoculars mr-2"></i>
+                Explore Tours
+            </button>
+        </div>
+        <div class="description text-center text-lg leading-relaxed text-gray-700 max-w-2xl mx-auto">
+            <p>Welcome to TourSystem, your gateway to exploring the world's most breathtaking destinations. We offer a curated selection of tours designed to provide unique and immersive experiences, whether you're seeking thrilling adventures, cultural insights, or serene escapes.</p>
+        </div>
+        
+        <!-- Featured Tours Section -->
+        <div class="featured-tours mt-16">
+            <h2 class="text-3xl font-bold text-center text-gray-900 mb-8">Featured Tours</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="featured-tour-card bg-white border border-gray-200 rounded-xl overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl">
+                    <img src="https://images.unsplash.com/photo-1506197603052-3b2a6780026e?w=500&auto=format&fit=crop&q=60" 
+                         alt="Safari Adventure" 
+                         class="w-full h-48 object-cover border-b border-gray-200">
+                    <div class="p-4">
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">African Safari</h3>
+                        <div class="flex justify-between items-center text-gray-600 text-sm mb-4">
+                            <span><i class="fas fa-dollar-sign mr-1"></i>1200</span>
+                            <span><i class="far fa-clock mr-1"></i>7 Days</span>
+                            <span><i class="fas fa-star text-yellow-400"></i> 4.8</span>
+                        </div>
+                        <button class="book-tour-btn w-full bg-primary-600 text-white px-4 py-2 rounded-lg cursor-pointer text-base font-semibold transition-colors duration-300 hover:bg-primary-700" 
+                                data-tour-id="1" 
+                                data-tour-name="African Safari" 
+                                data-requires-login="true">
+                            Quick Book
+                        </button>
+                    </div>
+                </div>
+                <div class="featured-tour-card bg-white border border-gray-200 rounded-xl overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl">
+                    <img src="https://images.unsplash.com/photo-1549877452-9c3821062970?w=500&auto=format&fit=crop&q=60" 
+                         alt="Historic City Walk" 
+                         class="w-full h-48 object-cover border-b border-gray-200">
+                    <div class="p-4">
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Historic City Walk</h3>
+                        <div class="flex justify-between items-center text-gray-600 text-sm mb-4">
+                            <span><i class="fas fa-dollar-sign mr-1"></i>50</span>
+                            <span><i class="far fa-clock mr-1"></i>3 Hours</span>
+                            <span><i class="fas fa-star text-yellow-400"></i> 4.5</span>
+                        </div>
+                        <button class="book-tour-btn w-full bg-primary-600 text-white px-4 py-2 rounded-lg cursor-pointer text-base font-semibold transition-colors duration-300 hover:bg-primary-700" 
+                                data-tour-id="2" 
+                                data-tour-name="Historic City Walk" 
+                                data-requires-login="true">
+                            Quick Book
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Other pages (About Us, Contact Us, Tours) remain similar but with added icons and enhanced styling -->
+    <!-- ... -->
+
+    <!-- Booking Modal Overlay -->
+    <div id="bookingModalOverlay" class="modal-overlay fixed inset-0 bg-black bg-opacity-60 z-[99] flex justify-center items-center"></div>
+
+    <!-- Enhanced Booking Form Container -->
+    <div id="bookingFormContainer" class="booking-form-container fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-8 rounded-xl shadow-2xl z-[100] max-w-md w-11/12 text-center">
+        <span class="close-btn absolute top-4 right-4 text-gray-500 text-2xl cursor-pointer hover:text-gray-800">&times;</span>
+        <h3 class="text-3xl font-bold text-gray-800 mb-6 flex items-center justify-center">
+            <i class="fas fa-calendar-check mr-3 text-primary-600"></i>
+            <span>Book Tour</span>
+        </h3>
+        <p class="text-gray-700 mb-4">You are booking: <span id="modalTourName" class="font-semibold text-primary-600"></span></p>
+
+        <form id="bookingForm" class="text-left">
+            {% csrf_token %}
+            <div class="form-group mb-4">
+                <label for="bookingDate" class="block mb-2 text-gray-700 font-semibold">
+                    <i class="far fa-calendar-alt mr-2 text-primary-600"></i>
+                    Tour Date:
+                </label>
+                <input type="date" id="bookingDate" name="bookingDate" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" required>
+            </div>
+            <div class="form-group mb-4">
+                <label for="numberOfPeople" class="block mb-2 text-gray-700 font-semibold">
+                    <i class="fas fa-users mr-2 text-primary-600"></i>
+                    Number of People:
+                </label>
+                <input type="number" id="numberOfPeople" name="numberOfPeople" min="1" max="20" value="1" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" required>
+            </div>
+            <div class="form-group mb-6">
+                <label for="specialRequests" class="block mb-2 text-gray-700 font-semibold">
+                    <i class="fas fa-edit mr-2 text-primary-600"></i>
+                    Special Requests:
+                </label>
+                <textarea id="specialRequests" name="specialRequests" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="Dietary restrictions, accessibility needs, etc."></textarea>
+            </div>
+            <div class="flex justify-end gap-3">
+                <button type="button" class="cancel-btn bg-red-600 text-white px-6 py-3 rounded-lg cursor-pointer text-base font-semibold transition-colors duration-300 hover:bg-red-700 flex items-center">
+                    <i class="fas fa-times mr-2"></i>
+                    Cancel
+                </button>
+                <button type="submit" class="submit-btn bg-secondary-600 text-white px-6 py-3 rounded-lg cursor-pointer text-base font-semibold transition-colors duration-300 hover:bg-secondary-700 flex items-center">
+                    <i class="fas fa-paper-plane mr-2"></i>
+                    Submit Booking
+                </button>
+            </div>
+        </form>
+
+        <div id="bookingMessage" class="booking-message mt-6 p-4 rounded-lg font-bold text-center"></div>
+    </div>
+
+    <!-- New Features: Review Modal -->
+    <div id="reviewModalOverlay" class="modal-overlay fixed inset-0 bg-black bg-opacity-60 z-[99] flex justify-center items-center"></div>
+    <div id="reviewFormContainer" class="booking-form-container fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-8 rounded-xl shadow-2xl z-[100] max-w-md w-11/12 text-center">
+        <span class="close-btn absolute top-4 right-4 text-gray-500 text-2xl cursor-pointer hover:text-gray-800">&times;</span>
+        <h3 class="text-3xl font-bold text-gray-800 mb-6">Leave a Review</h3>
+        <form id="reviewForm" class="text-left">
+            {% csrf_token %}
+            <div class="form-group mb-4">
+                <label class="block mb-2 text-gray-700 font-semibold">Rating:</label>
+                <div class="rating-stars flex justify-center gap-1 mb-4">
+                    <i class="fas fa-star text-2xl cursor-pointer text-gray-300 hover:text-yellow-400" data-rating="1"></i>
+                    <i class="fas fa-star text-2xl cursor-pointer text-gray-300 hover:text-yellow-400" data-rating="2"></i>
+                    <i class="fas fa-star text-2xl cursor-pointer text-gray-300 hover:text-yellow-400" data-rating="3"></i>
+                    <i class="fas fa-star text-2xl cursor-pointer text-gray-300 hover:text-yellow-400" data-rating="4"></i>
+                    <i class="fas fa-star text-2xl cursor-pointer text-gray-300 hover:text-yellow-400" data-rating="5"></i>
+                </div>
+                <input type="hidden" id="ratingValue" name="rating" value="0">
+            </div>
+            <div class="form-group mb-6">
+                <label for="reviewText" class="block mb-2 text-gray-700 font-semibold">Your Review:</label>
+                <textarea id="reviewText" name="reviewText" rows="5" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" required></textarea>
+            </div>
+            <div class="flex justify-end gap-3">
+                <button type="button" class="cancel-review-btn bg-gray-600 text-white px-6 py-3 rounded-lg cursor-pointer text-base font-semibold transition-colors duration-300 hover:bg-gray-700">Cancel</button>
+                <button type="submit" class="submit-review-btn bg-secondary-600 text-white px-6 py-3 rounded-lg cursor-pointer text-base font-semibold transition-colors duration-300 hover:bg-secondary-700">Submit Review</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Fix for the Django template syntax error
+            const isAuthenticated = "{{ user.is_authenticated|yesno:'true,false' }}" === "true";
+            const loginUrl = "{% url 'users:login' %}";
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            // Navigation and page switching
+            const navItems = document.querySelectorAll('.nav-item');
+            const pages = document.querySelectorAll('.page');
+            
+            const showPage = (pageId) => {
+                pages.forEach(page => {
+                    page.classList.remove('active');
+                    if (page.id === pageId) {
+                        page.classList.add('active');
+                        // Smooth scroll to top of page
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                });
+
+                navItems.forEach(item => {
+                    item.classList.remove('active');
+                    if (item.dataset.page === pageId) {
+                        item.classList.add('active');
+                    }
+                });
+            };
+
+            navItems.forEach(item => {
+                if (item.dataset.page) {
+                    item.addEventListener('click', () => showPage(item.dataset.page));
+                }
+            });
+
+            // Explore button click handler
+            document.querySelector('.explore-btn')?.addEventListener('click', () => {
+                showPage('tourspage');
+            });
+
+            // Booking system
+            const bookingModalOverlay = document.getElementById('bookingModalOverlay');
+            const bookingFormContainer = document.getElementById('bookingFormContainer');
+            const bookTourBtns = document.querySelectorAll('.book-tour-btn');
+            const modalTourName = document.getElementById('modalTourName');
+            const bookingForm = document.getElementById('bookingForm');
+            const bookingMessage = document.getElementById('bookingMessage');
+            let currentTourId = null;
+
+            // Show booking modal
+            bookTourBtns.forEach(button => {
+                button.addEventListener('click', () => {
+                    if (button.dataset.requiresLogin === 'true' && !isAuthenticated) {
+                        window.location.href = loginUrl + '?next=' + encodeURIComponent(window.location.pathname);
+                        return;
+                    }
+
+                    currentTourId = button.dataset.tourId;
+                    modalTourName.textContent = button.dataset.tourName;
+                    
+                    // Set minimum date to today
+                    const today = new Date().toISOString().split('T')[0];
+                    document.getElementById('bookingDate').min = today;
+                    
+                    bookingModalOverlay.classList.add('active');
+                    bookingFormContainer.classList.add('active');
+                    bookingMessage.className = 'booking-message';
+                    bookingMessage.textContent = '';
+                });
+            });
+
+            // Hide booking modal
+            const hideBookingModal = () => {
+                bookingModalOverlay.classList.remove('active');
+                bookingFormContainer.classList.remove('active');
+                bookingForm.reset();
+                currentTourId = null;
+            };
+
+            document.querySelector('.close-btn').addEventListener('click', hideBookingModal);
+            document.querySelector('.cancel-btn').addEventListener('click', hideBookingModal);
+            bookingModalOverlay.addEventListener('click', (e) => {
+                if (e.target === bookingModalOverlay) hideBookingModal();
+            });
+
+            // Handle booking form submission
+            bookingForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const formData = {
+                    tour_id: currentTourId,
+                    date: document.getElementById('bookingDate').value,
+                    number_of_people: document.getElementById('numberOfPeople').value,
+                    special_requests: document.getElementById('specialRequests').value
+                };
+
+                bookingMessage.className = 'booking-message processing';
+                bookingMessage.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Processing your booking...';
+
+                try {
+                    // Simulate API call
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    
+                    // Simulate random success/failure
+                    const success = Math.random() > 0.2; // 80% success rate
+                    
+                    if (success) {
+                        bookingMessage.className = 'booking-message success';
+                        bookingMessage.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Booking successful! Confirmation sent to your email.';
+                        
+                        // Reset form on success
+                        setTimeout(() => {
+                            hideBookingModal();
+                            // Show review modal after successful booking
+                            showReviewModal(currentTourId);
+                        }, 2000);
+                    } else {
+                        bookingMessage.className = 'booking-message error';
+                        bookingMessage.innerHTML = '<i class="fas fa-exclamation-circle mr-2"></i> Booking failed. Please try again.';
+                    }
+                } catch (error) {
+                    console.error('Booking error:', error);
+                    bookingMessage.className = 'booking-message error';
+                    bookingMessage.innerHTML = '<i class="fas fa-exclamation-triangle mr-2"></i> An error occurred. Please try again.';
+                }
+            });
+
+            // Review system
+            const reviewModalOverlay = document.getElementById('reviewModalOverlay');
+            const reviewFormContainer = document.getElementById('reviewFormContainer');
+            const reviewForm = document.getElementById('reviewForm');
+            const stars = document.querySelectorAll('.rating-stars i');
+            let selectedRating = 0;
+
+            // Star rating interaction
+            stars.forEach(star => {
+                star.addEventListener('click', () => {
+                    const rating = parseInt(star.dataset.rating);
+                    selectedRating = rating;
+                    document.getElementById('ratingValue').value = rating;
+                    
+                    stars.forEach((s, index) => {
+                        if (index < rating) {
+                            s.classList.add('text-yellow-400');
+                            s.classList.remove('text-gray-300');
+                        } else {
+                            s.classList.add('text-gray-300');
+                            s.classList.remove('text-yellow-400');
+                        }
+                    });
+                });
+            });
+
+            const showReviewModal = (tourId) => {
+                document.getElementById('ratingValue').value = 0;
+                document.getElementById('reviewText').value = '';
+                stars.forEach(star => {
+                    star.classList.add('text-gray-300');
+                    star.classList.remove('text-yellow-400');
+                });
+                
+                reviewModalOverlay.classList.add('active');
+                reviewFormContainer.classList.add('active');
+            };
+
+            const hideReviewModal = () => {
+                reviewModalOverlay.classList.remove('active');
+                reviewFormContainer.classList.remove('active');
+            };
+
+            document.querySelector('.cancel-review-btn').addEventListener('click', hideReviewModal);
+            document.querySelectorAll('.close-btn')[1].addEventListener('click', hideReviewModal);
+            reviewModalOverlay.addEventListener('click', (e) => {
+                if (e.target === reviewModalOverlay) hideReviewModal();
+            });
+
+            // Handle review form submission
+            reviewForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                if (selectedRating === 0) {
+                    alert('Please select a rating');
+                    return;
+                }
+
+                // Here you would typically send the review to your backend
+                console.log('Submitting review:', {
+                    tourId: currentTourId,
+                    rating: selectedRating,
+                    review: document.getElementById('reviewText').value
+                });
+
+                // Simulate submission
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                hideReviewModal();
+                
+                // Show success message
+                const successMsg = document.createElement('div');
+                successMsg.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg';
+                successMsg.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Thank you for your review!';
+                document.body.appendChild(successMsg);
+                
+                setTimeout(() => {
+                    successMsg.remove();
+                }, 3000);
+            });
+
+            // Filter functionality
+            document.querySelectorAll('.filter-header').forEach(header => {
+                header.addEventListener('click', () => {
+                    const content = header.nextElementSibling;
+                    const arrow = header.querySelector('.arrow-icon');
+                    
+                    content.classList.toggle('active');
+                    arrow.innerHTML = content.classList.contains('active') ? '&#9650;' : '&#9660;';
+                });
+            });
+
+            // Filter item selection
+            document.querySelectorAll('.category-item, .price-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    item.parentElement.querySelectorAll('.category-item, .price-item').forEach(sibling => {
+                        sibling.classList.remove('bg-primary-100', 'border-primary-500', 'text-primary-800');
+                    });
+                    
+                    item.classList.add('bg-primary-100', 'border-primary-500', 'text-primary-800');
+                    
+                    // Here you would typically filter the tours
+                    console.log(`Filter selected: ${item.textContent}`);
+                });
+            });
+
+            // Initialize date picker with today's date
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('bookingDate')?.setAttribute('min', today);
+        });
+    </script>
+</body>
+</html>
